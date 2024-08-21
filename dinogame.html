@@ -12,11 +12,11 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #001757;
+            background-color: #00977e;
         }
         canvas {
             border: 1px solid #000;
-            background-color: #00158d;
+            background-color: #0099ff;
         }
         #score {
             position: absolute;
@@ -100,15 +100,15 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Draw the ground
-            ctx.fillStyle = '#4caf50';
+            ctx.fillStyle = '#00ff00';
             ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
 
             // Draw the cube
-            ctx.fillStyle = '#2196f3';
+            ctx.fillStyle = '#ff0000';
             ctx.fillRect(cube.x, cube.y, cube.size, cube.size);
 
             // Draw obstacles
-            ctx.fillStyle = '#f44336';
+            ctx.fillStyle = '#ac5d03';
             obstacles.forEach(obstacle => {
                 ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
             });
