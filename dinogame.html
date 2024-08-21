@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cube Jump Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #001757;
+        }
+        canvas {
+            border: 1px solid #000;
+            background-color: #00158d;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Distance: 0</div>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        // Cube parameters
+        const cube = {
+            x: 50,
+            y: canvas.height - 60,
+            size: 30,  // Reduced size
+            speedY: 0,
+            gravity: 0.5,
+            jumpPower: -15,  // Increased jump power for higher jump
+            isJumping: false
+        };
+
+        // Obstacle parameters with decreased size
+        const obstacles = [
+            { x: canvas.width, y: canvas.height - 60, width: 20, height: 40 },
+            { x: canvas.width + 300, y: canvas.height - 60, width: 20, height: 40 }
+        ];
+        const obstacleSpeed = 3;
+
+        // Game state
+        let isGameOver = false;
+        let distanceTraveled = 0;
+
+        function update() {
+            if (isGameOver) return;
+
+            // Update cube's position
+            if (cube.isJumping) {
+                cube.y += cube.speedY;
+                cube.speedY += cube.gravity;
+
+                if (cube.y >= canvas.height - 60) {
+                    cube.y = canvas.height - 60;
+                    cube.isJumping = false;
+                    cube.speedY = 0;
+                }
+            }
+
+            // Update obstacles' positions
+            obstacles.forEach(obstacle => {
+                obstacle.x -= obstacleSpeed;
+                if (obstacle.x < -obstacle.width) {
+                    obstacle.x = canvas.width;
+                    distanceTraveled += 10;  // Increase distance when an obstacle moves off screen
+                }
+
+                // Collision detection
+                if (
+                    cube.x < obstacle.x + obstacle.width &&
+                    cube.x + cube.size > obstacle.x &&
+                    cube.y < obstacle.y + obstacle.height &&
+                    cube.y + cube.size > obstacle.y
+                ) {
+                    isGameOver = true;
+                    alert('Game Over!');
+                }
+            });
+
+            // Update score display
+            scoreElement.textContent = `Distance: ${Math.floor(distanceTraveled)}`;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the ground
+            ctx.fillStyle = '#4caf50';
+            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+
+            // Draw the cube
+            ctx.fillStyle = '#2196f3';
+            ctx.fillRect(cube.x, cube.y, cube.size, cube.size);
+
+            // Draw obstacles
+            ctx.fillStyle = '#f44336';
+            obstacles.forEach(obstacle => {
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listener for jump
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !cube.isJumping && !isGameOver) {
+                cube.isJumping = true;
+                cube.speedY = cube.jumpPower;
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
