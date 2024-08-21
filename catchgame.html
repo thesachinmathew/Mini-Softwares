@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Falling Objects</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #00eeff;
+        }
+        canvas {
+            border: 1px solid #000;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        // Paddle parameters
+        const paddle = {
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 20,
+            width: 100,
+            height: 15,
+            color: 'blue',
+            speed: 10
+        };
+
+        // Falling object parameters
+        const fallingObjects = [];
+        const fallingObjectSize = 20;
+        const fallingObjectSpeed = 3;
+        const fallingObjectInterval = 2000;  // Time in milliseconds to spawn a new falling object
+
+        let score = 0;
+        let lastSpawnTime = Date.now();
+
+        function drawPaddle() {
+            ctx.fillStyle = paddle.color;
+            ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+        }
+
+        function drawFallingObjects() {
+            ctx.fillStyle = 'red';
+            fallingObjects.forEach(obj => {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, fallingObjectSize, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function updateFallingObjects() {
+            fallingObjects.forEach(obj => {
+                obj.y += fallingObjectSpeed;
+
+                // Check if the falling object hits the paddle
+                if (
+                    obj.y + fallingObjectSize > paddle.y &&
+                    obj.x > paddle.x &&
+                    obj.x < paddle.x + paddle.width
+                ) {
+                    // Remove the object and increase score
+                    obj.y = canvas.height + 50;  // Move it out of view
+                    score += 10;
+                }
+                
+                // Remove the object if it falls below the canvas
+                if (obj.y > canvas.height) {
+                    fallingObjects.splice(fallingObjects.indexOf(obj), 1);
+                }
+            });
+        }
+
+        function spawnFallingObject() {
+            const x = Math.random() * (canvas.width - fallingObjectSize * 2) + fallingObjectSize;
+            const y = -fallingObjectSize;
+            fallingObjects.push({ x, y });
+        }
+
+        function updateScore() {
+            scoreElement.textContent = `Score: ${score}`;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawPaddle();
+            drawFallingObjects();
+        }
+
+        function gameLoop() {
+            const currentTime = Date.now();
+            if (currentTime - lastSpawnTime > fallingObjectInterval) {
+                spawnFallingObject();
+                lastSpawnTime = currentTime;
+            }
+
+            updateFallingObjects();
+            updateScore();
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft') {
+                paddle.x -= paddle.speed;
+                if (paddle.x < 0) paddle.x = 0;
+            } else if (e.code === 'ArrowRight') {
+                paddle.x += paddle.speed;
+                if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
